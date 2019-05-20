@@ -1,0 +1,23 @@
+<manifest package="io.indoorlocation.polestarlocationprovider"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Internet connectivity (for data synchro) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Bluetooth -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <!-- Wifi -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <!-- to allow WIFI/BLE Background scan -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- access to OS Loc / GPS -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <application>
+        <service android:name="io.indoorlocation.polestarlocationprovider.PolestarIndoorLocationProviderServiceManager" />
+    </application>
+
+</manifest>
