@@ -87,9 +87,11 @@ public class PolestarIndoorLocationProvider extends IndoorLocationProvider imple
             Double floor = this.floorByAlitudeMap.get(location.getAltitude());
             if (floor == null) {
                 indoorLocation = new IndoorLocation(standardLocation, location.getAltitude() / 5);
+                indoorLocation.setAccuracy(location.getAccuracy());
             }
             else {
                 indoorLocation = new IndoorLocation(standardLocation, floor);
+                indoorLocation.setAccuracy(location.getAccuracy());
             }
         }
         this.dispatchIndoorLocationChange(indoorLocation);
