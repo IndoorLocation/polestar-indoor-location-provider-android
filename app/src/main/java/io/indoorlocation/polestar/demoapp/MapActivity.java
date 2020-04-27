@@ -2,46 +2,89 @@ package io.indoorlocation.polestar.demoapp;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.FrameLayout;
 
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-
-import java.util.List;
+import java.util.Locale;
 
 import io.indoorlocation.polestarlocationprovider.PolestarIndoorLocationProvider;
-import io.mapwize.mapwizecomponents.ui.MapwizeFragment;
-import io.mapwize.mapwizeformapbox.api.MapwizeObject;
-import io.mapwize.mapwizeformapbox.map.MapOptions;
-import io.mapwize.mapwizeformapbox.map.MapwizePlugin;
+import io.mapwize.mapwizesdk.api.MapwizeObject;
+import io.mapwize.mapwizesdk.map.MapOptions;
+import io.mapwize.mapwizesdk.map.MapwizeMap;
+import io.mapwize.mapwizeui.MapwizeFragment;
 
 public class MapActivity extends AppCompatActivity implements MapwizeFragment.OnFragmentInteractionListener {
 
-    private MapboxMap mapboxMap;
-    private MapwizePlugin mapwizePlugin;
     private MapwizeFragment mapwizeFragment;
-    private PolestarIndoorLocationProvider polestarIndoorLocationProvider;
     private static final int MY_PERMISSION_ACCESS_FINE_LOCATION = 0;
+
+    MapwizeMap mapwizeMap;
+    private PolestarIndoorLocationProvider polestarIndoorLocationProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        initMap();
-    }
+        FrameLayout container = findViewById(R.id.container);
 
-    private void initMap() {
-        mapwizeFragment = MapwizeFragment.newInstance(new MapOptions.Builder().build());
+        MapOptions opts = new MapOptions.Builder()
+                .language(Locale.getDefault().getLanguage()).build();
+        mapwizeFragment = MapwizeFragment.newInstance(opts);
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
-        ft.add(R.id.contentLayout, mapwizeFragment);
+        ft.add(container.getId(), mapwizeFragment);
         ft.commit();
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mapwizeFragment.onStart();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mapwizeFragment.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        mapwizeFragment.onPause();
+        super.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        mapwizeFragment.onStop();
+        super.onStop();
+    }
+
+    @Override
+    public void onSaveInstanceState(@androidx.annotation.NonNull Bundle saveInstanceState) {
+        super.onSaveInstanceState(saveInstanceState);
+        mapwizeFragment.onSaveInstanceState(saveInstanceState);
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapwizeFragment.onLowMemory();
+    }
+
+    @Override
+    public void onDestroy() {
+        mapwizeFragment.onDestroy();
+        super.onDestroy();
     }
 
     private void startLocationService() {
@@ -56,90 +99,38 @@ public class MapActivity extends AppCompatActivity implements MapwizeFragment.On
     private void setupLocationProvider() {
         polestarIndoorLocationProvider = new PolestarIndoorLocationProvider(this, PolestarIndoorLocationProviderDemoApplication.POLESTAR_API_KEY);
         polestarIndoorLocationProvider.start();
-        if (mapwizePlugin != null) {
-            mapwizePlugin.setLocationProvider(polestarIndoorLocationProvider);
-        }
+        mapwizeMap.setIndoorLocationProvider(polestarIndoorLocationProvider);
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSION_ACCESS_FINE_LOCATION: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    setupLocationProvider();
-
-                }
+    public void onRequestPermissionsResult(int requestCode, @androidx.annotation.NonNull String permissions[], @NonNull int[] grantResults) {
+        if (requestCode == MY_PERMISSION_ACCESS_FINE_LOCATION) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                setupLocationProvider();
             }
         }
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
     public void onMenuButtonClick() {
-
+        Log.i("MapActivity", "onMenuButtonClick");
     }
 
     @Override
     public void onInformationButtonClick(MapwizeObject mapwizeObject) {
-
+        Log.i("MapActivity", "onInformationButtonClick");
     }
 
     @Override
-    public void onFragmentReady(MapboxMap mapboxMap, MapwizePlugin mapwizePlugin) {
-        this.mapboxMap = mapboxMap;
-        this.mapwizePlugin = mapwizePlugin;
-
+    public void onFragmentReady(MapwizeMap mapwizeMap) {
+        this.mapwizeMap = mapwizeMap;
         startLocationService();
     }
 
     @Override
     public void onFollowUserButtonClickWithoutLocation() {
-
+        Log.i("MapActivity", "onFollowUserButtonClickWithoutLocation");
     }
 
-    @Override
-    public boolean shouldDisplayInformationButton(MapwizeObject mapwizeObject) {
-        return false;
-    }
-
-    @Override
-    public boolean shouldDisplayFloorController(List<Double> floors) {
-        return false;
-    }
 }
